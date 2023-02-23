@@ -92,7 +92,7 @@ export function useMediaCapture(options = {}) {
       const kind = (video) ? 'videoinput' : 'audioinput';
       devices = await enumerateDevices(kind);
       // we can't get the labels without obtaining permission first
-      if (devices.every(d => !d.label)) {
+      if (devices.length > 0 && devices.every(d => !d.label)) {
         // trigger request for permission, then enumerate again
         const stream = await getMediaStream({ video, audio });
         stopMediaStream(stream);
