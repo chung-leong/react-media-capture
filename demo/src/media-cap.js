@@ -92,7 +92,7 @@ export function useMediaCapture(options = {}) {
       const kind = (video) ? 'videoinput' : 'audioinput';
       devices = await enumerateDevices(kind);
       // we can't get the labels without obtaining permission first
-      if (devices.every(d => !d.label)) {
+      if (devices.length > 0 && devices.every(d => !d.label)) {
         // trigger request for permission, then enumerate again
         const stream = await getMediaStream({ video, audio });
         stopMediaStream(stream);
@@ -280,11 +280,12 @@ export function useMediaCapture(options = {}) {
     await mount();
 
     // set up event listeners
-    window.addEventListener('orientationchange', (evt) => {
+    window.screen.orientation.addEventListener('change', (evt) => {
       // wait for resize event to occur
       window.addEventListener('resize', async () => {
         if (liveVideo) {
           const el = await createVideoElement(stream);
+          console.log({ width: el.videoWidth, height: el.videoHeight })
           if (el.videoWidth !== liveVideo.width || el.videoHeight !== liveVideo.height) {
             liveVideo = { stream, width: el.videoWidth, height: el.videoHeight };
             on.streamChange({ type: 'resize' });
@@ -403,17 +404,13 @@ export function useMediaCapture(options = {}) {
 }
 
 async function enumerateDevices(kind) {
-  try {
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    return devices.filter(d => d.kind === kind).map(({ deviceId, label }) => {
-      return {
-        id: deviceId,
-        label: label || '',
-      };
-    });
-  } catch (err) {
-    return [];
-  }
+  const devices = await navigator.mediaDevices.enumerateDevices();
+  return devices.filter(d => d.kind === kind).map(({ deviceId, label }) => {
+    return {
+      id: deviceId,
+      label: label || '',
+    };
+  });
 }
 
 async function getMediaStream(constraints) {

@@ -90,9 +90,12 @@ describe('Hooks', function() {
           const el = createElement(Test);
           await render(el);
           await delay(10);
-          const { status, lastError } = state;
+          const { status, lastError, liveVideo } = state;
           expect(status).to.equal('previewing');
           expect(lastError).to.be.undefined;
+          expect(liveVideo).to.be.an('object');
+          expect(liveVideo.width).to.be.at.least(100);
+          expect(liveVideo.height).to.be.at.least(100);
         });
       });
     })
@@ -409,5 +412,37 @@ describe('Hooks', function() {
         });
       });
     });        
+  })
+  it('should update dimensions when device is rotated', async function() {
+    await withFakeDOM(async () => {
+      navigator.mediaDevices.addDevice({
+        deviceId: '007',
+        groupId: '007',
+        kind: 'videoinput',
+        label: 'Sky camera',
+      });
+      await withTestRenderer(async ({ render }) => {
+        let state;
+        function Test() {
+          state = useMediaCapture({
+            video: true,
+          });
+          return null;                
+        }
+        const el = createElement(Test);
+        await render(el);
+        await delay(10);
+        const { status, liveVideo } = state;
+        expect(status).to.equal('previewing');
+        expect(liveVideo).to.be.an('object');
+        const { width, height } = liveVideo;
+        window.screen.orientation.rotate();
+        await delay(10);
+        const { liveVideo: after } = state;
+        expect(after).to.not.equal(liveVideo);
+        expect(after.width).to.equal(height);
+        expect(after.height).to.equal(width);
+      });
+    });
   })
 })

@@ -280,7 +280,7 @@ export function useMediaCapture(options = {}) {
     await mount();
 
     // set up event listeners
-    window.addEventListener('orientationchange', (evt) => {
+    window.screen.orientation.addEventListener('change', (evt) => {
       // wait for resize event to occur
       window.addEventListener('resize', async () => {
         if (liveVideo) {

@@ -18,11 +18,34 @@ class Window extends EventTarget {
     this.window = this;
     this.document = new Document();
     this.navigator = new Navigator();
+    this.screen = new Screen();
 
     this.fetch = fetch;
     this.MediaRecorder = MediaRecorder;
     this.HTMLCanvasElement = HTMLCanvasElement;
     this.HTMLVideoElement = HTMLVideoElement;
+  }
+}
+
+class Screen extends EventTarget {
+  constructor() {
+    super();
+    this.orientation = new ScreenOrientation();
+  }
+}
+
+class ScreenOrientation extends EventTarget {
+  constructor() {
+    super();
+    this.angle = 0;
+    this.type = 'langscape-primary';
+  }
+
+  rotate() {
+    this.angle = (this.angle + 90) % 360;
+    this.type = `${(this.angle % 180) ? 'portrait' : 'landscape'}-primary`;
+    this.dispatchEvent(new Event('change'));
+    window.dispatchEvent(new Event('resize')); 
   }
 }
 
@@ -40,9 +63,32 @@ class HTMLVideoElement extends EventTarget {
   constructor() {
     super();
     this.playing = false;
-    this.videoWidth = 0;
-    this.videoHeight = 0;
+    this.loaded = false;
     this.srcObject = null;
+  }
+
+  get videoWidth() {
+    if (!this.loaded) {
+      return 0;
+    } else {
+      if (screen.orientation.angle % 180 === 0) {
+        return 640;
+      } else {
+        return 350;
+      }
+    }
+  }
+
+  get videoHeight() {
+    if (!this.loaded) {
+      return 0;
+    } else {
+      if (screen.orientation.angle % 180 === 0) {
+        return 350;
+      } else {
+        return 640;
+      }  
+    }
   }
 
   play() {
@@ -50,6 +96,7 @@ class HTMLVideoElement extends EventTarget {
       setTimeout(() => {
         try {
           this.srcObject.onPlay?.();
+          this.loaded = true;
           this.playing = true;
           this.oncanplay?.({});  
         } catch (err) {
