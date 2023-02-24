@@ -21,6 +21,7 @@ class Window extends EventTarget {
     this.screen = new Screen();
 
     this.fetch = fetch;
+    this.Blob = Blob;
     this.MediaRecorder = MediaRecorder;
     this.HTMLCanvasElement = HTMLCanvasElement;
     this.HTMLVideoElement = HTMLVideoElement;
@@ -162,10 +163,18 @@ class MediaDevices extends EventTarget {
   constructor() {
     super();
     this.devices = [];
+    this.granted = false;
   }
 
   async enumerateDevices() {
-    return this.devices.slice(0);
+    return this.devices.map((device) => {
+      if (this.granted) {
+        return device;
+      } else {
+        // no label until getUserMedia() is called
+        return { ...device, label: '' };
+      }
+    });
   }
 
   addDevice(info) {
@@ -206,6 +215,7 @@ class MediaDevices extends EventTarget {
     } else {
       const stream = new MediaStream(devices);
       this.onStreamResponse?.(stream);
+      this.granted = true;
       return stream;
     }
   }
@@ -254,6 +264,11 @@ class MediaRecorder extends EventTarget {
     this.options = options;
     this.recording = false;
     this.paused = false;
+    this.stream.onData = (data) => {
+      const evt = new Event('dataavailable');
+      evt.data = data;
+      this.dispatchEvent(evt);
+    };
   }
 
   start(segment) {
@@ -304,4 +319,11 @@ class Permissions {
 }
 
 class Status extends EventTarget {  
+}
+
+class Blob {
+  constructor(list, meta) {
+    this.list = list;
+    this.meta = meta;
+  }
 }

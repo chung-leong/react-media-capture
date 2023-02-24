@@ -119,9 +119,9 @@ export function useMediaCapture(options = {}) {
       if (device) {
         // put in device id
         if (video) {
-          constraints.video = { ...(video instanceof Object ? video : {}), deviceId: device.id };
+          constraints.video = { ...video, deviceId: device.id };
         } else if (audio) {
-          constraints.audio = { ...(audio instanceof Object ? audio : {}), deviceId: device.id };
+          constraints.audio = { ...audio, deviceId: device.id };
         }
       }
       stream = await getMediaStream(constraints);
@@ -269,7 +269,8 @@ export function useMediaCapture(options = {}) {
       volume = undefined;
     }
 
-    function onDataAvailable({ data }) {
+    function onDataAvailable(evt) {
+      const { data } = evt;
       mediaData.push(data);
       if (mediaDataCallback) {
         mediaDataCallback(data);

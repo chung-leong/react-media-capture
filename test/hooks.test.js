@@ -62,7 +62,7 @@ describe('Hooks', function() {
             deviceId: '007',
             groupId: '007',
             kind: 'videoinput',
-            label: 'Sky camera',
+            label: 'Spy camera',
           });
           await delay(10);
           const { status: status2, devices } = state;
@@ -77,7 +77,7 @@ describe('Hooks', function() {
           deviceId: '007',
           groupId: '007',
           kind: 'videoinput',
-          label: 'Sky camera',
+          label: 'Spy camera',
         });
         await withTestRenderer(async ({ render }) => {
           let state;
@@ -96,6 +96,33 @@ describe('Hooks', function() {
           expect(liveVideo).to.be.an('object');
           expect(liveVideo.width).to.be.at.least(100);
           expect(liveVideo.height).to.be.at.least(100);
+        });
+      });
+    })
+    it('should obtain audio stream', async function() {
+      await withFakeDOM(async () => {
+        navigator.mediaDevices.addDevice({
+          deviceId: '007',
+          groupId: '007',
+          kind: 'audioinput',
+          label: 'Spy microphone',
+        });
+        await withTestRenderer(async ({ render }) => {
+          let state;
+          function Test() {
+            state = useMediaCapture({
+              audio: true,
+              video: false,
+            });
+            return null;                
+          }
+          const el = createElement(Test);
+          await render(el);
+          await delay(10);
+          const { status, lastError, liveAudio } = state;
+          expect(status).to.equal('previewing');
+          expect(lastError).to.be.undefined;
+          expect(liveAudio).to.be.an('object');
         });
       });
     })
@@ -158,7 +185,50 @@ describe('Hooks', function() {
           expect(lastError).to.be.undefined;
         });
       });
-    });
+    })
+    it('should request device matching preferredDevice', async function() {
+      await withFakeDOM(async () => {
+        navigator.mediaDevices.addDevice({
+          deviceId: '00001-1',
+          groupId: '00001',
+          kind: 'videoinput',
+          label: 'Back facing camera',
+        });
+        navigator.mediaDevices.addDevice({
+          deviceId: '00002-1',
+          groupId: '00002',
+          kind: 'videoinput',
+          label: 'Front facing camera',
+        });
+        await withTestRenderer(async ({ render }) => {
+          let state;
+          function Test() {
+            state = useMediaCapture({
+              video: true,
+              audio: false,
+              preferredDevice: 'front',
+            });
+            return null;                
+          }
+          const el = createElement(Test);
+          await render(el);
+          await delay(10);
+          const { liveVideo, status, devices, selectDevice, selectedDeviceId } = state;
+          expect(liveVideo).to.not.be.undefined;
+          const { stream } = liveVideo;
+          const [ track ] = stream.getTracks();
+          expect(devices).to.have.lengthOf(2);
+          expect(track.device).to.have.property('deviceId', '00002-1');
+          expect(selectedDeviceId).to.equal('00002-1');
+          expect(status).to.equal('previewing');
+          selectDevice('00001-1');
+          await delay(10);
+          const { liveVideo: videoAfter, selectedDeviceId: idAfter } = state;
+          expect(videoAfter).to.not.equal(liveVideo);
+          expect(idAfter).to.equal('00001-1');
+        });
+      });
+    })
     it('should start recording when record is called', async function() {
       await withFakeDOM(async () => {
         navigator.mediaDevices.addDevice({
@@ -190,7 +260,7 @@ describe('Hooks', function() {
           stop();
         });
       });
-    });
+    })
     it('should return to previewing when nothing is recorded', async function() {
       await withFakeDOM(async () => {
         navigator.mediaDevices.addDevice({
@@ -226,7 +296,47 @@ describe('Hooks', function() {
           expect(status3).to.equal('previewing');
         });
       });
-    });      
+    })      
+    it('should proceed to recorded when something is recorded', async function() {
+      await withFakeDOM(async () => {
+        navigator.mediaDevices.addDevice({
+          deviceId: '00002-1',
+          groupId: '00002',
+          kind: 'videoinput',
+          label: 'Front facing camera',
+        });
+        await withTestRenderer(async ({ render, unmount }) => {
+          let state;
+          function Test() {
+            state = useMediaCapture({
+              video: true,
+              audio: false,
+            });
+            return null;                
+          }
+          const el = createElement(Test);
+          await render(el);
+          await delay(10);
+          const { liveVideo, status, record, stop } = state;
+          expect(liveVideo).to.not.be.undefined;
+          expect(status).to.equal('previewing');
+          record();
+          await delay(10);
+          const { duration, status: status2 } = state;
+          expect(status2).to.equal('recording');
+          expect(duration).to.equal(0);
+          liveVideo.stream.onData(new Blob([], {}));
+          liveVideo.stream.onData(new Blob([], {}));
+          await delay(10);
+          stop();
+          await delay(10);
+          const { status: status3, capturedVideo } = state;
+          expect(status3).to.equal('recorded');
+          expect(capturedVideo).to.be.an('object');
+          expect(capturedVideo.blob).to.be.instanceOf(Blob);
+        });
+      });
+    })
     it('should pause recording when pause is called', async function() {
       await withFakeDOM(async () => {
         navigator.mediaDevices.addDevice({
@@ -263,7 +373,7 @@ describe('Hooks', function() {
           stop();          
         });
       });
-    }); 
+    }) 
     it('should resume recording when resume is called', async function() {
       await withFakeDOM(async () => {
         navigator.mediaDevices.addDevice({
@@ -304,7 +414,7 @@ describe('Hooks', function() {
           stop();
         });
       });
-    }); 
+    }) 
     it('should snap a picture when snap is called', async function() {
       await withFakeDOM(async () => {
         navigator.mediaDevices.addDevice({
@@ -336,7 +446,7 @@ describe('Hooks', function() {
           expect(capturedImage).to.be.an('object');
         });
       });
-    });      
+    })      
     it('should use toDataURL when toBlob is not available', async function() {
       await withFakeDOM(async () => {
         navigator.mediaDevices.addDevice({
@@ -374,7 +484,7 @@ describe('Hooks', function() {
           }
         });
       });
-    });      
+    })      
     it('should clear caputred image when clear is called', async function() {
       await withFakeDOM(async () => {
         navigator.mediaDevices.addDevice({
@@ -411,38 +521,194 @@ describe('Hooks', function() {
           expect(capturedImage2).to.be.undefined;
         });
       });
-    });        
-  })
-  it('should update dimensions when device is rotated', async function() {
-    await withFakeDOM(async () => {
-      navigator.mediaDevices.addDevice({
-        deviceId: '007',
-        groupId: '007',
-        kind: 'videoinput',
-        label: 'Sky camera',
+    })        
+    it('should update dimensions when device is rotated', async function() {
+      await withFakeDOM(async () => {
+        navigator.mediaDevices.addDevice({
+          deviceId: '007',
+          groupId: '007',
+          kind: 'videoinput',
+          label: 'Spy camera',
+        });
+        await withTestRenderer(async ({ render }) => {
+          let state;
+          function Test() {
+            state = useMediaCapture({
+              video: true,
+            });
+            return null;                
+          }
+          const el = createElement(Test);
+          await render(el);
+          await delay(10);
+          const { status, liveVideo } = state;
+          expect(status).to.equal('previewing');
+          expect(liveVideo).to.be.an('object');
+          const { width, height } = liveVideo;
+          window.screen.orientation.rotate();
+          await delay(10);
+          const { liveVideo: after } = state;
+          expect(after).to.not.equal(liveVideo);
+          expect(after.width).to.equal(height);
+          expect(after.height).to.equal(width);
+        });
       });
-      await withTestRenderer(async ({ render }) => {
-        let state;
-        function Test() {
-          state = useMediaCapture({
-            video: true,
-          });
-          return null;                
-        }
-        const el = createElement(Test);
-        await render(el);
-        await delay(10);
-        const { status, liveVideo } = state;
-        expect(status).to.equal('previewing');
-        expect(liveVideo).to.be.an('object');
-        const { width, height } = liveVideo;
-        window.screen.orientation.rotate();
-        await delay(10);
-        const { liveVideo: after } = state;
-        expect(after).to.not.equal(liveVideo);
-        expect(after.width).to.equal(height);
-        expect(after.height).to.equal(width);
+    })
+    it('should acquire new stream during previewing when current one is terminated', async function() {
+      await withFakeDOM(async () => {
+        navigator.mediaDevices.addDevice({
+          deviceId: '00002-1',
+          groupId: '00002',
+          kind: 'videoinput',
+          label: 'Front facing camera',
+        });
+        navigator.mediaDevices.addDevice({
+          deviceId: '00001-1',
+          groupId: '00001',
+          kind: 'videoinput',
+          label: 'Back facing camera',
+        });
+        await withTestRenderer(async ({ render, unmount }) => {
+          let state;
+          function Test() {
+            state = useMediaCapture({
+              video: true,
+              audio: false,
+            });
+            return null;                
+          }
+          const el = createElement(Test);
+          await render(el);
+          await delay(10);
+          const { liveVideo, status } = state;
+          expect(liveVideo).to.not.be.undefined;
+          expect(status).to.equal('previewing');
+          const [ track ] = liveVideo.stream.getTracks();
+          track.onended({ type: 'ended' });
+          await delay(10);
+          const { liveVideo: video, status: status2 } = state;
+          expect(status2).to.equal('previewing');
+          expect(video).to.not.equal(liveVideo);
+        });
       });
-    });
+    })
+    it('should return to previewing when nothing is recorded at stream termination', async function() {
+      await withFakeDOM(async () => {
+        navigator.mediaDevices.addDevice({
+          deviceId: '00002-1',
+          groupId: '00002',
+          kind: 'videoinput',
+          label: 'Front facing camera',
+        });
+        await withTestRenderer(async ({ render, unmount }) => {
+          let state;
+          function Test() {
+            state = useMediaCapture({
+              video: true,
+              audio: false,
+            });
+            return null;                
+          }
+          const el = createElement(Test);
+          await render(el);
+          await delay(10);
+          const { liveVideo, status, record } = state;
+          expect(liveVideo).to.not.be.undefined;
+          expect(status).to.equal('previewing');
+          record();
+          await delay(10);
+          const { duration, status: status2 } = state;
+          expect(status2).to.equal('recording');
+          expect(duration).to.equal(0);
+          const [ track ] = liveVideo.stream.getTracks();
+          track.onended({ type: 'ended' });
+          await delay(10);
+          const { status: status3 } = state;
+          expect(status3).to.equal('previewing');
+        });
+      });
+    })      
+    it('should proceed to recorded when something is recorded at stream termination', async function() {
+      await withFakeDOM(async () => {
+        navigator.mediaDevices.addDevice({
+          deviceId: '00002-1',
+          groupId: '00002',
+          kind: 'videoinput',
+          label: 'Front facing camera',
+        });
+        await withTestRenderer(async ({ render, unmount }) => {
+          let state;
+          function Test() {
+            state = useMediaCapture({
+              video: true,
+              audio: false,
+            });
+            return null;                
+          }
+          const el = createElement(Test);
+          await render(el);
+          await delay(10);
+          const { liveVideo, status, record } = state;
+          expect(liveVideo).to.not.be.undefined;
+          expect(status).to.equal('previewing');
+          record();
+          await delay(10);
+          const { duration, status: status2 } = state;
+          expect(status2).to.equal('recording');
+          expect(duration).to.equal(0);
+          liveVideo.stream.onData(new Blob([], {}));
+          await delay(10);
+          const [ track ] = liveVideo.stream.getTracks();
+          track.onended({ type: 'ended' });
+          await delay(10);
+          const { status: status3, capturedVideo } = state;
+          expect(status3).to.equal('recorded');
+          expect(capturedVideo).to.be.an('object');
+        });
+      });
+    })
+    it('should handle stream termination when recorded video is being viewed', async function() {
+      await withFakeDOM(async () => {
+        navigator.mediaDevices.addDevice({
+          deviceId: '00002-1',
+          groupId: '00002',
+          kind: 'videoinput',
+          label: 'Front facing camera',
+        });
+        await withTestRenderer(async ({ render, unmount }) => {
+          let state;
+          function Test() {
+            state = useMediaCapture({
+              video: true,
+              audio: false,
+            });
+            return null;                
+          }
+          const el = createElement(Test);
+          await render(el);
+          await delay(10);
+          const { liveVideo, status, record, stop } = state;
+          expect(status).to.equal('previewing');
+          record();
+          await delay(10);
+          const { duration, status: status2 } = state;
+          expect(status2).to.equal('recording');
+          expect(duration).to.equal(0);
+          liveVideo.stream.onData(new Blob([], {}));
+          await delay(10);
+          stop();
+          await delay(10);
+          const { status: status3, capturedVideo, liveVideo: before } = state;
+          expect(status3).to.equal('recorded');
+          expect(capturedVideo).to.be.an('object');
+          expect(before).to.be.an('object');
+          const [ track ] = liveVideo.stream.getTracks();
+          track.onended({ type: 'ended' });
+          await delay(10);
+          const { liveVideo: after } = state;
+          expect(after).to.be.undefined;
+        });
+      });
+    })
   })
 })
