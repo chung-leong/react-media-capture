@@ -403,17 +403,13 @@ export function useMediaCapture(options = {}) {
 }
 
 async function enumerateDevices(kind) {
-  try {
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    return devices.filter(d => d.kind === kind).map(({ deviceId, label }) => {
-      return {
-        id: deviceId,
-        label: label || '',
-      };
-    });
-  } catch (err) {
-    return [];
-  }
+  const devices = await navigator.mediaDevices.enumerateDevices();
+  return devices.filter(d => d.kind === kind).map(({ deviceId, label }) => {
+    return {
+      id: deviceId,
+      label: label || '',
+    };
+  });
 }
 
 async function getMediaStream(constraints) {
