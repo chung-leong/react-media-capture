@@ -253,6 +253,7 @@ export function useMediaCapture(options = {}) {
         };
         audioSource = audioContext.createMediaStreamSource(stream);
         audioSource.connect(audioWorklet);
+        /* c8 ignore next 2 */
       } catch (err) {
       }
     }

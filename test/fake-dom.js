@@ -23,6 +23,8 @@ class Window extends EventTarget {
     this.fetch = fetch;
     this.Blob = Blob;
     this.MediaRecorder = MediaRecorder;
+    this.AudioContext = AudioContext;
+    this.AudioWorkletNode = AudioWorkletNode;
     this.HTMLCanvasElement = HTMLCanvasElement;
     this.HTMLVideoElement = HTMLVideoElement;
   }
@@ -42,8 +44,8 @@ class ScreenOrientation extends EventTarget {
     this.type = 'langscape-primary';
   }
 
-  rotate() {
-    this.angle = (this.angle + 90) % 360;
+  rotate(angle = 90) {
+    this.angle = (this.angle + angle) % 360;
     this.type = `${(this.angle % 180) ? 'portrait' : 'landscape'}-primary`;
     this.dispatchEvent(new Event('change'));
     window.dispatchEvent(new Event('resize')); 
@@ -163,10 +165,15 @@ class MediaDevices extends EventTarget {
   constructor() {
     super();
     this.devices = [];
+    this.allow = true;
     this.granted = false;
+    this.hideDevices = false;
   }
 
   async enumerateDevices() {
+    if (this.hideDevices) {
+      return [];
+    }
     return this.devices.map((device) => {
       if (this.granted) {
         return device;
@@ -196,7 +203,9 @@ class MediaDevices extends EventTarget {
   }
 
   async getUserMedia(constraints) {
-    this.onStreamRequest?.(constraints);
+    if (!this.allow) {
+      throw new Error('Permission denied');
+    }
     const devices = [];
     for (const [ kind, value ] of Object.entries(constraints)) {
       let device;
@@ -214,7 +223,6 @@ class MediaDevices extends EventTarget {
       throw new Error('Unable to find a device matching constraint');
     } else {
       const stream = new MediaStream(devices);
-      this.onStreamResponse?.(stream);
       this.granted = true;
       return stream;
     }
@@ -319,6 +327,62 @@ class Permissions {
 }
 
 class Status extends EventTarget {  
+}
+
+class AudioContext {
+  constructor() {
+    this.audioWorklet = new AudioWorklet();
+  }
+
+  async resume() {    
+  }
+
+  close() {   
+  }
+
+  createMediaStreamSource(stream) {
+    return new MediaStreamAudioSourceNode(stream);
+  }
+}
+
+class AudioWorkletNode {
+  constructor(context, name) {
+    this.context = context;
+    this.name = name;
+    this.channel = new MessageChannel();
+    this.port = this.channel.port1;
+  }
+
+  onData(data) {
+    if (this.name === 'volume-monitor') {
+      this.channel.port2.postMessage({ volume: data.volume });
+    }
+  }
+}
+
+class AudioWorklet {
+  constructor() {
+    this.modules = [];
+  }
+
+  addModule(url) {
+    this.modules.push(url);
+  }
+}
+
+class MediaStreamAudioSourceNode {
+  constructor(stream) {
+    this.stream = stream;
+    stream.onData = (data) => this.onData?.(data);
+  }
+
+  connect(destination) {
+    this.onData = (data) => destination.onData?.(data);
+  }
+
+  disconnect(destination) {
+    this.onData = undefined;
+  }
 }
 
 class Blob {
