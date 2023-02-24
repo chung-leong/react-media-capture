@@ -18,6 +18,8 @@ class Window extends EventTarget {
     this.window = this;
     this.document = new Document();
     this.navigator = new Navigator();
+
+    this.MediaRecorder = MediaRecorder;
   }
 }
 
@@ -25,6 +27,8 @@ class Document extends EventTarget {
   createElement(tagName) {
     if (tagName.toUpperCase() === 'VIDEO') {
       return new VideoElement();
+    } else if (tagName.toUpperCase() === 'CANVAS') {
+      return new CanvasElement();
     }
   }
 }
@@ -58,6 +62,31 @@ class VideoElement extends EventTarget {
 
   getTracks() {
     return this.tracks;
+  }
+}
+
+class CanvasElement extends EventTarget {
+  constructor() {
+    super();
+  }
+
+  getContext(type) {
+    if (type === '2d') {
+      return new CanvasRenderingContext2D();
+    }
+  }
+
+  toBlob(cb, mimeType, quality) {
+    setTimeout(() => cb({ type: 'blob', mimeType, quality }), 0);
+  }
+
+  toDataURL() {
+    return 'data://';
+  }
+}
+
+class CanvasRenderingContext2D {
+  drawImage() {
   }
 }
 
@@ -155,6 +184,32 @@ class MediaStreamTrack extends EventTarget {
 
   stop() {
     this.stopped = true;
+  }
+}
+
+class MediaRecorder extends EventTarget {
+  constructor(stream, options) {
+    super();
+    this.stream = stream;
+    this.options = options;
+    this.recording = false;
+  }
+
+  start(segment) {
+    this.segment = segment;
+    this.recording = true;
+    setTimeout(() => {
+      const evt = new Event('start');
+      this.dispatchEvent(evt);
+    }, 0);
+  }
+
+  stop() {
+    this.recording = false;
+    setTimeout(() => {
+      const evt = new Event('stop');
+      this.dispatchEvent(evt);
+    }, 0);
   }
 }
 

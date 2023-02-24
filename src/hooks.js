@@ -119,9 +119,9 @@ export function useMediaCapture(options = {}) {
       if (device) {
         // put in device id
         if (video) {
-          constraints.video = { ...video, deviceId: device.id };
+          constraints.video = { ...(video instanceof Object ? video : {}), deviceId: device.id };
         } else if (audio) {
-          constraints.audio = { ...audio, deviceId: device.id };
+          constraints.audio = { ...(audio instanceof Object ? audio : {}), deviceId: device.id };
         }
       }
       stream = await getMediaStream(constraints);
@@ -139,7 +139,7 @@ export function useMediaCapture(options = {}) {
         track.onended = on.streamChange.bind({ type: 'streamend' });
       }
       // monitor audio volume
-      watchAudioVolume();
+      await watchAudioVolume();
     }
 
     function closeStream() {
@@ -235,43 +235,37 @@ export function useMediaCapture(options = {}) {
     }
 
     let audioContext;
-    let audioProcessor;
+    let audioWorklet;
     let audioSource;
 
-    function watchAudioVolume() {
+    async function watchAudioVolume() {
       if (typeof(AudioContext) !== 'function' || !watchVolume || !audio) {
         return;
       }
-      audioContext = new AudioContext();
-      audioProcessor = audioContext.createScriptProcessor(4096, 1, 1);
-      audioSource = audioContext.createMediaStreamSource(stream);
-      audioProcessor.addEventListener('audioprocess', ({ inputBuffer }) => {
-        const samples = inputBuffer.getChannelData(0);
-        let max = 0;
-        for (const s of samples) {
-          if (s > max) {
-            max = s;
-          }
-        }
-        const newVolume = Math.round(max * 100);
-        if (newVolume !== volume) {
-          volume = newVolume;
+      try {
+        audioContext = new AudioContext();
+        await audioContext.resume();
+        await audioContext.audioWorklet.addModule(new URL('./volume-monitor.js', import.meta.url));
+        audioWorklet = new AudioWorkletNode(audioContext, 'volume-monitor');
+        audioWorklet.port.onmessage = ({ data }) => { 
+          volume = data.volume;
           on.volumeChange({ type: 'volumechange' });
-        }
-      });
-      audioSource.connect(audioProcessor);
-      audioProcessor.connect(audioContext.destination);
+        };
+        audioSource = audioContext.createMediaStreamSource(stream);
+        audioSource.connect(audioWorklet);
+      } catch (err) {
+      }
     }
 
     function unwatchAudioVolume() {
       if (!audioContext) {
         return;
       }
-      audioProcessor.disconnect(audioContext.destination);
-      audioSource.disconnect(audioProcessor);
+      audioSource.disconnect(audioWorklet);
+      audioContext.close();
+      audioWorklet = undefined;
       audioContext = undefined;
       audioSource = undefined;
-      audioProcessor = undefined;
       volume = undefined;
     }
 
@@ -375,7 +369,7 @@ export function useMediaCapture(options = {}) {
               capturedImage = undefined;
               status = (stream) ? 'previewing' : 'acquiring';
               if (stream) {
-                watchAudioVolume();
+                await watchAudioVolume();
                 // refresh the list just in case something was plugged in
                 await getDevices();
               }
