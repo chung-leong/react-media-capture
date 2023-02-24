@@ -98,7 +98,7 @@ class HTMLVideoElement extends EventTarget {
     if (this.srcObject) {
       setTimeout(() => {
         try {
-          this.srcObject.onPlay?.();
+          this.srcObject.tap();
           this.loaded = true;
           this.playing = true;
           this.oncanplay?.({});  
@@ -246,6 +246,12 @@ class MediaStream extends EventTarget {
   getTracks() {
     return this.tracks;
   }
+
+  tap() {
+    for (const track of this.tracks) {
+      track.tap();
+    }
+  }
 }
 
 class MediaStreamTrack extends EventTarget {
@@ -262,6 +268,12 @@ class MediaStreamTrack extends EventTarget {
 
   stop() {
     this.stopped = true;
+  }
+
+  tap() {
+    if (this.device.defective) {
+      throw new Error('Device is defective');
+    }
   }
 }
 

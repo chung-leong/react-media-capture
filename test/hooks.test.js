@@ -99,6 +99,32 @@ describe('Hooks', function() {
         });
       });
     })
+    it('should fail when device is defective', async function() {
+      await withFakeDOM(async () => {
+        navigator.mediaDevices.addDevice({
+          deviceId: '007',
+          groupId: '007',
+          kind: 'videoinput',
+          label: 'Spy camera',
+          defective: true,
+        });
+        await withTestRenderer(async ({ render }) => {
+          let state;
+          function Test() {
+            state = useMediaCapture({
+              video: true,
+            });
+            return null;                
+          }
+          const el = createElement(Test);
+          await render(el);
+          await delay(10);
+          const { status, lastError, liveVideo } = state;
+          expect(status).to.equal('denied');
+          expect(lastError).to.be.an('error').with.property('message', 'Device is defective');
+        });
+      });
+    })
     it('should be able to get a stream even if browser does not give list of devices', async function() {
       await withFakeDOM(async () => {
         navigator.mediaDevices.addDevice({
