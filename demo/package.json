@@ -1,5 +1,6 @@
 {
-  "name": "media-cap",
+  "name": "react-media-capture-demo",
+  "homepage": "https://chung-leong.github.io/react-media-capture",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
