@@ -1,6 +1,6 @@
 {
   "name": "react-media-capture",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "React hook for capturing video, audio, or images",
   "main": "index.js",
   "type": "module",
@@ -14,6 +14,19 @@
     "type": "git",
     "url": "git+https://github.com/chung-leong/react-media-capture.git"
   },
+  "keywords": [
+    "video",
+    "audio",
+    "capture",
+    "capturing",
+    "media",
+    "camera",
+    "recording"
+  ],
+  "files": [
+    "src/",
+    "index.js"
+  ],
   "author": "Chung Leong",
   "license": "MIT",
   "bugs": {
