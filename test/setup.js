@@ -1,5 +1,5 @@
 import AbortController from 'abort-controller';
-import EventTarget from 'event-target';
+import EventTargetModule from 'event-target'; const EventTarget = EventTargetModule.default;
 
 if (!global.AbortController) {
   global.AbortController = AbortController;
