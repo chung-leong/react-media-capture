@@ -344,12 +344,16 @@ class Status extends EventTarget {
 class AudioContext {
   constructor() {
     this.audioWorklet = new AudioWorklet();
+    this.nodes = [];
   }
 
   async resume() {    
   }
 
-  close() {   
+  close() {
+    for (const node of this.nodes) {
+      node.onClose();
+    }
   }
 
   createMediaStreamSource(stream) {
@@ -363,12 +367,18 @@ class AudioWorkletNode {
     this.name = name;
     this.channel = new MessageChannel();
     this.port = this.channel.port1;
+    context.nodes.push(this);
   }
 
   onData(data) {
     if (this.name === 'volume-monitor') {
       this.channel.port2.postMessage({ volume: data.volume });
     }
+  }
+
+  onClose() {
+    this.channel.port1.close();
+    this.channel.port2.close();
   }
 }
 

@@ -36,6 +36,7 @@
   "devDependencies": {
     "c8": "^7.12.0",
     "chai": "^4.3.7",
+    "event-target": "^1.2.3",
     "mocha": "^10.2.0",
     "react": "^18.2.0",
     "react-test-renderer": "^18.2.0"

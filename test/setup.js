@@ -1,7 +1,11 @@
 import AbortController from 'abort-controller';
+import EventTarget from 'event-target';
 
-if (!(AbortController in global)) {
+if (!global.AbortController) {
   global.AbortController = AbortController;
+}
+if (!global.EventTarget) {
+  global.EventTarget = EventTarget;
 }
 
 global.resolve = (path) => {

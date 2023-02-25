@@ -987,7 +987,7 @@ describe('Hooks', function() {
           expect(status3).to.equal('previewing');
         });
       });
-    })      
+    })
     it('should return to previewing when nothing is recorded at stream termination during pause', async function() {
       await withFakeDOM(async () => {
         navigator.mediaDevices.addDevice({
@@ -1027,7 +1027,7 @@ describe('Hooks', function() {
           expect(status4).to.equal('previewing');
         });
       });
-    })      
+    })
     it('should proceed to recorded when something is recorded at stream termination', async function() {
       await withFakeDOM(async () => {
         navigator.mediaDevices.addDevice({
@@ -1209,6 +1209,10 @@ describe('Hooks', function() {
           expect(liveAudio).to.not.be.undefined;
           expect(status).to.equal('previewing');
           liveAudio.stream.onData({ volume: 51 });
+          await delay(10);
+          const { volume } = state;
+          expect(volume).to.equal(51);
+          await unmount();
         });
       });
     })
