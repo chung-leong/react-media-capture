@@ -1,8 +1,6 @@
 import { useCallback, useEffect } from 'react';
-import { useMediaCapture } from './media-cap.js';
+import { useMediaCapture, StreamVideo, BlobImage } from 'react-media-capture';
 import { constrainSize } from './utils.js';
-import StreamVideo from './StreamVideo.js';
-import BlobImage from './BlobImage.js';
 
 export default function PhotoDialogBox({ onClose, onCapture }) {
   const {

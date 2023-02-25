@@ -1,7 +1,6 @@
 import { useCallback, useEffect } from 'react';
-import { useMediaCapture } from './media-cap.js';
+import { useMediaCapture, BlobAudio } from 'react-media-capture';
 import { constrainSize } from './utils.js';
-import BlobAudio from './BlobAudio.js';
 
 export default function AudioDialogBox({ onClose, onCapture }) {
   const {

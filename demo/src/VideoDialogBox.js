@@ -1,8 +1,6 @@
 import { useCallback, useEffect } from 'react';
-import { useMediaCapture } from './media-cap.js';
+import { useMediaCapture, StreamVideo, BlobVideo } from 'react-media-capture';
 import { constrainSize } from './utils.js';
-import StreamVideo from './StreamVideo.js';
-import BlobVideo from './BlobVideo.js';
 
 export default function VideoDialogBox({ onClose, onCapture }) {
   const {
@@ -109,15 +107,15 @@ export default function VideoDialogBox({ onClose, onCapture }) {
             return <div className="volume" />;
           }
           const iconClassNames = [ 'fa' ];
-          if (volume > 40) {
+          if (volume > 20) {
             iconClassNames.push('fa-volume-up');
-          } else if (volume > 10) {
+          } else if (volume > 5) {
             iconClassNames.push('fa-volume-down');
           } else {
             iconClassNames.push('fa-volume-off');
           }
           const barClassNames = [ 'volume-bar', status ];
-          const barStyle = { width: volume + '%' };
+          const barStyle = { width: Math.min(100, volume * 2) + '%' };
           return (
             <div className="volume">
               <i className={iconClassNames.join(' ')} />
