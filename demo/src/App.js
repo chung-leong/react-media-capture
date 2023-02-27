@@ -3,6 +3,7 @@ import { useState, useCallback } from 'react';
 import VideoDialogBox from './VideoDialogBox.js';
 import PhotoDialogBox from './PhotoDialogBox.js';
 import AudioDialogBox from './AudioDialogBox.js';
+import ErrorBoundary from './ErrorBoundary.js';
 
 export default function App() {
   const [ selection, setSelection ] = useState(null);
@@ -20,6 +21,7 @@ export default function App() {
           <li><button onClick={() => setSelection('audio')}>AudioDialogBox</button></li>
         </ul>
       </div>
+      <ErrorBoundary>
       {(() => {
         switch(selection) {
           case 'video':
@@ -31,6 +33,7 @@ export default function App() {
           default:
         }
       })()}
+      </ErrorBoundary>
     </div>
   );
 }
