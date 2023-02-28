@@ -235,8 +235,9 @@ export function useMediaCapture(options = {}) {
     }
 
     let audioContext;
-    let audioWorklet;
     let audioSource;
+    let audioAnalyser;
+    let audioInterval;
 
     async function watchAudioVolume() {
       if (typeof(AudioContext) !== 'function' || !watchVolume || !audio) {
@@ -244,15 +245,28 @@ export function useMediaCapture(options = {}) {
       }
       try {
         audioContext = new AudioContext();
-        await audioContext.resume();
-        await audioContext.audioWorklet.addModule(new URL('./volume-monitor.js', import.meta.url));
-        audioWorklet = new AudioWorkletNode(audioContext, 'volume-monitor');
-        audioWorklet.port.onmessage = ({ data }) => { 
-          volume = data.volume;
-          on.volumeChange({ type: 'volumechange' });
-        };
-        audioSource = audioContext.createMediaStreamSource(stream);
-        audioSource.connect(audioWorklet);
+        audioAnalyser = new AnalyserNode(audioContext, { fftSize: 256, smoothingTimeConstant: 0.3 });
+        audioSource = new MediaStreamAudioSourceNode(audioContext, { mediaStream: stream });
+        audioSource.connect(audioAnalyser);
+        const { frequencyBinCount } = audioAnalyser;
+        const { sampleRate } = audioContext;
+        const data = new Float32Array(frequencyBinCount);
+        const step = sampleRate / 2 / frequencyBinCount;
+        audioInterval = setInterval(() => {
+          let maxDb = -Infinity;
+          audioAnalyser.getFloatFrequencyData(data);
+          for (let i = (300 / step)|0, f = i * step; f <= 3400; i++, f += step) {
+            const db = data[i]
+            if (db > maxDb) {
+              maxDb = db;
+            }                
+          }
+          const newVolume = Math.round(maxDb);
+          if (newVolume !== volume) {
+            volume = newVolume;
+            on.volumeChange({ type: 'volumechange' });  
+          }
+        }, 50);
         /* c8 ignore next 2 */
       } catch (err) {
       }
@@ -262,11 +276,12 @@ export function useMediaCapture(options = {}) {
       if (!audioContext) {
         return;
       }
-      audioSource.disconnect(audioWorklet);
+      clearInterval(audioInterval);
+      audioSource.disconnect(audioAnalyser);
       audioContext.close();
-      audioWorklet = undefined;
       audioContext = undefined;
       audioSource = undefined;
+      audioAnalyser = undefined;
       volume = undefined;
     }
 
@@ -282,7 +297,7 @@ export function useMediaCapture(options = {}) {
     await mount();
 
     // set up event listeners
-    window.screen.orientation.addEventListener('change', (evt) => {
+    const orientationChange = (evt) => {
       // wait for resize event to occur
       window.addEventListener('resize', async () => {
         if (liveVideo) {
@@ -293,13 +308,20 @@ export function useMediaCapture(options = {}) {
           }
         }
       }, { once: true });
-    }, { signal });
+    };
+    if (window.screen.orientation) {
+      window.screen.orientation.addEventListener('change', orientationChange, { signal });
+    } else {
+      window.addEventListener('orientationchange', orientationChange, { signal });
+    }
     navigator.mediaDevices.addEventListener('devicechange', on.deviceChange, { signal });
 
     // watch for permission change
-    for (const name of [ 'camera', 'microphone' ]) {
-      const status = await navigator.permissions.query({ name });
-      status.addEventListener('change', on.permissionChange, { signal });
+    if (navigator.permissions) {
+      for (const name of [ 'camera', 'microphone' ]) {
+        const status = await navigator.permissions.query({ name });
+        status.addEventListener('change', on.permissionChange, { signal });
+      } 
     }
 
     try {
@@ -430,6 +452,7 @@ async function createVideoElement(stream) {
     const video = document.createElement('VIDEO');
     video.srcObject = stream;
     video.muted = true;
+    video.playsInline = true;
     video.oncanplay = () => resolve(video);
     video.onerror = (evt) => reject(evt.error);
     video.play();

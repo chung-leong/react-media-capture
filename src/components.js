@@ -1,21 +1,21 @@
-import { useRef, useEffect, useMemo, createElement } from 'react';
+import { useRef, useEffect, createElement } from 'react';
 
 export function BlobAudio(props) {
   const { srcObject, ...remaining } = props;
-  const src = useBlobURL(srcObject);
-  return createElement('audio', { src, ...remaining });
+  const ref = useBlobURL(srcObject);
+  return createElement('audio', { ref, ...remaining });
 }
 
 export function BlobImage(props) {
   const { srcObject, ...remaining } = props;
-  const src = useBlobURL(srcObject);
-  return createElement('img', { src, ...remaining });
+  const ref = useBlobURL(srcObject);
+  return createElement('img', { ref, ...remaining });
 }
 
 export function BlobVideo(props) {
   const { srcObject, ...remaining } = props;
-  const src = useBlobURL(srcObject);
-  return createElement('video', { src, ...remaining });
+  const ref = useBlobURL(srcObject);
+  return createElement('video', { ref, ...remaining });
 }
 
 export function StreamVideo(props) {
@@ -23,18 +23,25 @@ export function StreamVideo(props) {
   const ref = useRef();
   useEffect(() => {
     const video = ref.current;
-    video.srcObject = srcObject;
-    if (srcObject) {
-      video.play();
-    }  
+    if (video.srcObject !== srcObject) {
+      video.srcObject = srcObject;
+      if (srcObject) {
+        video.play();
+      } 
+    }
   }, [ srcObject ]);
-  return createElement('video', { ref, ...remaining });
+  return createElement('video', { ref, playsInline: true, ...remaining });
 }
 
 function useBlobURL(srcObject) {
-  const url = useMemo(() => URL.createObjectURL(srcObject), [ srcObject ]);
+  const ref = useRef();
   useEffect(() => {
-    return () => URL.revokeObjectURL(url);
-  }, [ url ]);
-  return url;
+    const url = (srcObject) ? URL.createObjectURL(srcObject) : undefined;
+    const node = ref.current;
+    if (node) {
+      node.src = url;
+    }
+    return (srcObject) ? () => URL.revokeObjectURL(url) : undefined;
+  }, [ srcObject ]);
+  return ref;
 }
