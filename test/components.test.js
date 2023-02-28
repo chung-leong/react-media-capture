@@ -34,8 +34,10 @@ describe('Components', function() {
       await withTestRenderer(async ({ render, unmount, toJSON }) => {
         const srcObject = { blob: 'audio-1' };
         const el = createElement(BlobAudio, { srcObject });
-        await render(el);
-        const { type, props: { src } } = toJSON();
+        const node = {};
+        await render(el, { createNodeMock: () => node });
+        const { type } = toJSON();
+        const { src } = node;
         expect(type).to.equal('audio');
         expect(src).to.match(/blob:/);
         expect(map[src]).to.not.be.undefined;
@@ -49,8 +51,10 @@ describe('Components', function() {
       await withTestRenderer(async ({ render, unmount, toJSON }) => {
         const srcObject = { blob: 'image-1' };
         const el = createElement(BlobImage, { srcObject });
-        await render(el);
-        const { type, props: { src } } = toJSON();
+        const node = {};
+        await render(el, { createNodeMock: () => node });
+        const { type } = toJSON();
+        const { src } = node;
         expect(type).to.equal('img');
         expect(src).to.match(/blob:/);
         expect(map[src]).to.not.be.undefined;
@@ -59,13 +63,30 @@ describe('Components', function() {
       });  
     })   
   })
+  describe('#BlobImage', function() {
+    it('should not set src when srcObject is null', async () => {
+      await withTestRenderer(async ({ render, unmount, toJSON }) => {
+        const srcObject = null;
+        const el = createElement(BlobImage, { srcObject });
+        const node = {};
+        await render(el, { createNodeMock: () => node });
+        const { type } = toJSON();
+        const { src } = node;
+        expect(type).to.equal('img');
+        expect(src).to.not.match(/blob:/);
+        expect(map[src]).to.undefined;
+      });  
+    })   
+  })
   describe('#BlobVideo', function() {
     it('should render an video element', async () => {
       await withTestRenderer(async ({ render, unmount, toJSON }) => {
         const srcObject = { blob: 'video-1' };
         const el = createElement(BlobVideo, { srcObject });
-        await render(el);
-        const { type, props: { src } } = toJSON();
+        const node = {};
+        await render(el, { createNodeMock: () => node });
+        const { type } = toJSON();
+        const { src } = node;
         expect(type).to.equal('video');
         expect(src).to.match(/blob:/);
         expect(map[src]).to.not.be.undefined;

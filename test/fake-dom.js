@@ -24,7 +24,8 @@ class Window extends EventTarget {
     this.Blob = Blob;
     this.MediaRecorder = MediaRecorder;
     this.AudioContext = AudioContext;
-    this.AudioWorkletNode = AudioWorkletNode;
+    this.AnalyserNode = AnalyserNode;
+    this.MediaStreamAudioSourceNode = MediaStreamAudioSourceNode;
     this.HTMLCanvasElement = HTMLCanvasElement;
     this.HTMLVideoElement = HTMLVideoElement;
   }
@@ -48,7 +49,10 @@ class ScreenOrientation extends EventTarget {
     this.angle = (this.angle + angle) % 360;
     this.type = `${(this.angle % 180) ? 'portrait' : 'landscape'}-primary`;
     this.dispatchEvent(new Event('change'));
-    window.dispatchEvent(new Event('resize')); 
+    window.dispatchEvent(new Event('orientationchange'));
+    setTimeout(() => {
+      window.dispatchEvent(new Event('resize')); 
+    }, 5); 
   }
 }
 
@@ -74,7 +78,7 @@ class HTMLVideoElement extends EventTarget {
     if (!this.loaded) {
       return 0;
     } else {
-      if (screen.orientation.angle % 180 === 0) {
+      if ((screen.orientation?.angle|0) % 180 === 0) {
         return 640;
       } else {
         return 350;
@@ -86,7 +90,7 @@ class HTMLVideoElement extends EventTarget {
     if (!this.loaded) {
       return 0;
     } else {
-      if (screen.orientation.angle % 180 === 0) {
+      if ((screen.orientation?.angle|0) % 180 === 0) {
         return 350;
       } else {
         return 640;
@@ -343,59 +347,41 @@ class Status extends EventTarget {
 
 class AudioContext {
   constructor() {
-    this.audioWorklet = new AudioWorklet();
-    this.nodes = [];
+    this.sampleRate = 44000;
   }
 
   async resume() {    
   }
 
   close() {
-    for (const node of this.nodes) {
-      node.onClose();
-    }
-  }
-
-  createMediaStreamSource(stream) {
-    return new MediaStreamAudioSourceNode(stream);
   }
 }
 
-class AudioWorkletNode {
-  constructor(context, name) {
+class AnalyserNode {
+  constructor(context, { fftSize, smoothingTimeConstant }) {
     this.context = context;
-    this.name = name;
-    this.channel = new MessageChannel();
-    this.port = this.channel.port1;
-    context.nodes.push(this);
+    this.fftSize = fftSize;
+    this.frequencyBinCount = fftSize >> 1;
+    this.smoothingTimeConstant = smoothingTimeConstant;
+    this.volume = -Infinity;
   }
 
-  onData(data) {
-    if (this.name === 'volume-monitor') {
-      this.channel.port2.postMessage({ volume: data.volume });
+  getFloatFrequencyData(buffer) {
+    for (let i = 0; i < buffer.length; i++) {
+      buffer[i] = this.volume;
     }
   }
 
-  onClose() {
-    this.channel.port1.close();
-    this.channel.port2.close();
-  }
-}
-
-class AudioWorklet {
-  constructor() {
-    this.modules = [];
-  }
-
-  addModule(url) {
-    this.modules.push(url);
+  onData({ volume }) {
+    this.volume = volume;
   }
 }
 
 class MediaStreamAudioSourceNode {
-  constructor(stream) {
-    this.stream = stream;
-    stream.onData = (data) => this.onData?.(data);
+  constructor(context, { mediaStream }) {
+    this.context = context;
+    this.stream = mediaStream;
+    this.stream.onData = (data) => this.onData?.(data);
   }
 
   connect(destination) {

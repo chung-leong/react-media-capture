@@ -35,7 +35,7 @@ describe('Hooks', function() {
           }
           const el = createElement(Test);
           await render(el);
-          await delay(10);
+          await delay(20);
           const { status, lastError } = state;
           expect(status).to.equal('denied');
           expect(lastError).to.be.an('error');
@@ -54,7 +54,7 @@ describe('Hooks', function() {
           }
           const el = createElement(Test);
           await render(el);
-          await delay(10);
+          await delay(20);
           const { status, lastError } = state;
           expect(status).to.equal('denied');
           expect(lastError).to.be.an('error');
@@ -64,7 +64,7 @@ describe('Hooks', function() {
             kind: 'videoinput',
             label: 'Spy camera',
           });
-          await delay(10);
+          await delay(20);
           const { status: status2, devices } = state;
           expect(status2).to.equal('previewing');
           expect(devices).to.have.lengthOf(1);  
@@ -89,7 +89,7 @@ describe('Hooks', function() {
           }
           const el = createElement(Test);
           await render(el);
-          await delay(10);
+          await delay(20);
           const { status, lastError, liveVideo } = state;
           expect(status).to.equal('previewing');
           expect(lastError).to.be.undefined;
@@ -118,7 +118,7 @@ describe('Hooks', function() {
           }
           const el = createElement(Test);
           await render(el);
-          await delay(10);
+          await delay(20);
           const { status, lastError, liveVideo } = state;
           expect(status).to.equal('denied');
           expect(lastError).to.be.an('error').with.property('message', 'Device is defective');
@@ -144,7 +144,7 @@ describe('Hooks', function() {
           }
           const el = createElement(Test);
           await render(el);
-          await delay(10);
+          await delay(20);
           const { status, lastError, liveVideo } = state;
           expect(status).to.equal('previewing');
           expect(lastError).to.be.undefined;
@@ -174,7 +174,7 @@ describe('Hooks', function() {
           }
           const el = createElement(Test);
           await render(el);
-          await delay(10);
+          await delay(20);
           const { status, lastError, liveVideo } = state;
           expect(status).to.equal('previewing');
           expect(lastError).to.be.undefined;
@@ -185,7 +185,7 @@ describe('Hooks', function() {
             kind: 'videoinput',
             label: 'Spectre vision',
           });
-          await delay(10);
+          await delay(20);
           const { selectedDeviceId } = state;
           expect(selectedDeviceId).to.equal('008');
         });
@@ -210,7 +210,7 @@ describe('Hooks', function() {
           }
           const el = createElement(Test);
           await render(el);
-          await delay(10);
+          await delay(20);
           const { status, lastError, liveVideo } = state;
           expect(status).to.equal('previewing');
           expect(lastError).to.be.undefined;
@@ -221,7 +221,7 @@ describe('Hooks', function() {
             kind: 'videoinput',
             label: 'Spectre vision',
           });
-          await delay(10);
+          await delay(20);
           const { selectedDeviceId } = state;
           expect(selectedDeviceId).to.equal('007');
         });
@@ -246,7 +246,7 @@ describe('Hooks', function() {
           }
           const el = createElement(Test);
           await render(el);
-          await delay(10);
+          await delay(20);
           const { status, lastError, liveAudio } = state;
           expect(status).to.equal('previewing');
           expect(lastError).to.be.undefined;
@@ -267,7 +267,7 @@ describe('Hooks', function() {
           }
           const el = createElement(Test);
           await render(el);
-          await delay(10);
+          await delay(20);
           const { status, lastError, devices } = state;
           expect(devices).to.eql([]);
           expect(status).to.equal('denied');
@@ -301,7 +301,7 @@ describe('Hooks', function() {
           }
           const el = createElement(Test);
           await render(el);
-          await delay(10);
+          await delay(20);
           const { liveVideo, status, lastError, devices, selectedDeviceId } = state;
           expect(liveVideo).to.not.be.undefined;
           const { stream } = liveVideo;
@@ -340,7 +340,7 @@ describe('Hooks', function() {
           }
           const el = createElement(Test);
           await render(el);
-          await delay(10);
+          await delay(20);
           const { liveVideo, status, devices, selectDevice, selectedDeviceId } = state;
           expect(liveVideo).to.not.be.undefined;
           const { stream } = liveVideo;
@@ -350,7 +350,7 @@ describe('Hooks', function() {
           expect(selectedDeviceId).to.equal('00002-1');
           expect(status).to.equal('previewing');
           selectDevice('00001-1');
-          await delay(10);
+          await delay(20);
           const { liveVideo: videoAfter, selectedDeviceId: idAfter } = state;
           expect(videoAfter).to.not.equal(liveVideo);
           expect(idAfter).to.equal('00001-1');
@@ -376,15 +376,15 @@ describe('Hooks', function() {
           }
           const el = createElement(Test);
           await render(el);
-          await delay(10);
+          await delay(20);
           const { liveVideo, status, record, stop } = state;
           expect(liveVideo).to.not.be.undefined;
           expect(status).to.equal('previewing');
           record();
-          await delay(10);
+          await delay(20);
           const { status: status2 } = state;
           expect(status2).to.equal('recording');
-          await delay(10);
+          await delay(20);
           stop();
         });
       });
@@ -408,18 +408,18 @@ describe('Hooks', function() {
           }
           const el = createElement(Test);
           await render(el);
-          await delay(10);
+          await delay(20);
           const { liveVideo, status, record, stop } = state;
           expect(liveVideo).to.not.be.undefined;
           expect(status).to.equal('previewing');
           record();
-          await delay(10);
+          await delay(20);
           const { duration, status: status2 } = state;
           expect(status2).to.equal('recording');
           expect(duration).to.equal(0);
-          await delay(10);
+          await delay(20);
           stop();
-          await delay(10);
+          await delay(20);
           const { status: status3 } = state;
           expect(status3).to.equal('previewing');
         });
@@ -444,20 +444,20 @@ describe('Hooks', function() {
           }
           const el = createElement(Test);
           await render(el);
-          await delay(10);
+          await delay(20);
           const { liveVideo, status, record, stop } = state;
           expect(liveVideo).to.not.be.undefined;
           expect(status).to.equal('previewing');
           record();
-          await delay(10);
+          await delay(20);
           const { duration, status: status2 } = state;
           expect(status2).to.equal('recording');
           expect(duration).to.equal(0);
           liveVideo.stream.onData(new Blob([], {}));
           liveVideo.stream.onData(new Blob([], {}));
-          await delay(10);
+          await delay(20);
           stop();
-          await delay(10);
+          await delay(20);
           const { status: status3, capturedVideo } = state;
           expect(status3).to.equal('recorded');
           expect(capturedVideo).to.be.an('object');
@@ -484,20 +484,20 @@ describe('Hooks', function() {
           }
           const el = createElement(Test);
           await render(el);
-          await delay(10);
+          await delay(20);
           const { liveAudio, status, record, stop } = state;
           expect(liveAudio).to.not.be.undefined;
           expect(status).to.equal('previewing');
           record();
-          await delay(10);
+          await delay(20);
           const { duration, status: status2 } = state;
           expect(status2).to.equal('recording');
           expect(duration).to.equal(0);
           liveAudio.stream.onData(new Blob([], {}));
           liveAudio.stream.onData(new Blob([], {}));
-          await delay(10);
+          await delay(20);
           stop();
-          await delay(10);
+          await delay(20);
           const { status: status3, capturedAudio } = state;
           expect(status3).to.equal('recorded');
           expect(capturedAudio).to.be.an('object');
@@ -524,21 +524,21 @@ describe('Hooks', function() {
           }
           const el = createElement(Test);
           await render(el);
-          await delay(10);
+          await delay(20);
           const { liveVideo, status, record, stop } = state;
           expect(liveVideo).to.not.be.undefined;
           expect(status).to.equal('previewing');
           let calls = 0;
           record({}, 1000, () => calls++);
-          await delay(10);
+          await delay(20);
           const { duration, status: status2 } = state;
           expect(status2).to.equal('recording');
           expect(duration).to.equal(0);
           liveVideo.stream.onData(new Blob([], {}));
           liveVideo.stream.onData(new Blob([], {}));
-          await delay(10);
+          await delay(20);
           stop();
-          await delay(10);
+          await delay(20);
           const { status: status3, capturedVideo } = state;
           expect(status3).to.equal('recorded');
           expect(capturedVideo).to.be.an('object');
@@ -565,18 +565,18 @@ describe('Hooks', function() {
           }
           const el = createElement(Test);
           await render(el);
-          await delay(10);
+          await delay(20);
           const { liveVideo, status, record, pause, stop } = state;
           expect(liveVideo).to.not.be.undefined;
           expect(status).to.equal('previewing');
           record();
-          await delay(10);
+          await delay(20);
           const { duration, status: status2 } = state;
           expect(status2).to.equal('recording');
           expect(duration).to.equal(0);
-          await delay(10);
+          await delay(20);
           pause();
-          await delay(10);
+          await delay(20);
           const { status: status3 } = state;
           expect(status3).to.equal('paused');
           stop();          
@@ -602,22 +602,22 @@ describe('Hooks', function() {
           }
           const el = createElement(Test);
           await render(el);
-          await delay(10);
+          await delay(20);
           const { liveVideo, status, record, pause, resume, stop } = state;
           expect(liveVideo).to.not.be.undefined;
           expect(status).to.equal('previewing');
           record();
-          await delay(10);
+          await delay(20);
           const { duration, status: status2 } = state;
           expect(status2).to.equal('recording');
           expect(duration).to.equal(0);
-          await delay(10);
+          await delay(20);
           pause();
-          await delay(10);
+          await delay(20);
           const { status: status3 } = state;
           expect(status3).to.equal('paused');
           resume();
-          await delay(10);
+          await delay(20);
           const { status: status4 } = state;
           expect(status4).to.equal('recording');
           stop();
@@ -643,23 +643,23 @@ describe('Hooks', function() {
           }
           const el = createElement(Test);
           await render(el);
-          await delay(10);
+          await delay(20);
           const { liveVideo, status, record, pause, stop } = state;
           expect(liveVideo).to.not.be.undefined;
           expect(status).to.equal('previewing');
           record();
-          await delay(10);
+          await delay(20);
           const { duration, status: status2 } = state;
           expect(status2).to.equal('recording');
           expect(duration).to.equal(0);
           liveVideo.stream.onData(new Blob([], {}));
-          await delay(10);
+          await delay(20);
           pause();
-          await delay(10);
+          await delay(20);
           const { status: status3 } = state;
           expect(status3).to.equal('paused');
           stop();
-          await delay(10);
+          await delay(20);
           const { status: status4 } = state;
           expect(status4).to.equal('recorded');
         });
@@ -684,22 +684,22 @@ describe('Hooks', function() {
           }
           const el = createElement(Test);
           await render(el);
-          await delay(10);
+          await delay(20);
           const { liveVideo, status, record, pause, stop } = state;
           expect(liveVideo).to.not.be.undefined;
           expect(status).to.equal('previewing');
           record();
-          await delay(10);
+          await delay(20);
           const { duration, status: status2 } = state;
           expect(status2).to.equal('recording');
           expect(duration).to.equal(0);
-          await delay(10);
+          await delay(20);
           pause();
-          await delay(10);
+          await delay(20);
           const { status: status3 } = state;
           expect(status3).to.equal('paused');
           stop();
-          await delay(10);
+          await delay(20);
           const { status: status4 } = state;
           expect(status4).to.equal('previewing');
         });
@@ -724,12 +724,12 @@ describe('Hooks', function() {
           }
           const el = createElement(Test);
           await render(el);
-          await delay(10);
+          await delay(20);
           const { liveVideo, status, snap } = state;
           expect(liveVideo).to.not.be.undefined;
           expect(status).to.equal('previewing');
           snap();
-          await delay(10);
+          await delay(20);
           const { capturedImage, lastError, status: status2 } = state;
           expect(status2).to.equal('recorded');
           expect(lastError).to.not.be.an('error');
@@ -756,7 +756,7 @@ describe('Hooks', function() {
           }
           const el = createElement(Test);
           await render(el);
-          await delay(10);
+          await delay(20);
           const { liveVideo, status, snap } = state;
           expect(liveVideo).to.not.be.undefined;
           expect(status).to.equal('previewing');
@@ -764,7 +764,7 @@ describe('Hooks', function() {
           HTMLCanvasElement.prototype.toBlob = undefined;
           try {
             snap();
-            await delay(10);
+            await delay(20);
             const { capturedImage, lastError, status: status2 } = state;
             expect(status2).to.equal('recorded');
             expect(lastError).to.not.be.an('error');
@@ -794,18 +794,18 @@ describe('Hooks', function() {
           }
           const el = createElement(Test);
           await render(el);
-          await delay(10);
+          await delay(20);
           const { liveVideo, status, snap, clear } = state;
           expect(liveVideo).to.not.be.undefined;
           expect(status).to.equal('previewing');
           snap();
-          await delay(10);
+          await delay(20);
           const { capturedImage, lastError, status: status2 } = state;
           expect(status2).to.equal('recorded');
           expect(lastError).to.not.be.an('error');
           expect(capturedImage).to.be.an('object');
           clear();
-          await delay(10);
+          await delay(20);
           const { capturedImage: capturedImage2, status: status3 } = state;
           expect(status3).to.equal('previewing');
           expect(capturedImage2).to.be.undefined;
@@ -831,21 +831,21 @@ describe('Hooks', function() {
           }
           const el = createElement(Test);
           await render(el);
-          await delay(10);
+          await delay(20);
           const { liveVideo, status, snap, clear } = state;
           expect(liveVideo).to.not.be.undefined;
           expect(status).to.equal('previewing');
           snap();
-          await delay(10);
+          await delay(20);
           const { capturedImage, lastError, status: status2 } = state;
           expect(status2).to.equal('recorded');
           expect(lastError).to.not.be.an('error');
           expect(capturedImage).to.be.an('object');
           const [ track ] = liveVideo.stream.getTracks();
           track.onended({ type: 'ended' });
-          await delay(10);
+          await delay(20);
           clear();
-          await delay(10);
+          await delay(20);
           const { capturedImage: capturedImage2, status: status3 } = state;
           expect(status3).to.equal('previewing');
           expect(capturedImage2).to.be.undefined;
@@ -870,13 +870,48 @@ describe('Hooks', function() {
           }
           const el = createElement(Test);
           await render(el);
-          await delay(10);
+          await delay(20);
           const { status, liveVideo } = state;
           expect(status).to.equal('previewing');
           expect(liveVideo).to.be.an('object');
           const { width, height } = liveVideo;
           window.screen.orientation.rotate();
-          await delay(10);
+          await delay(20);
+          const { liveVideo: after } = state;
+          expect(after).to.not.equal(liveVideo);
+          expect(after.width).to.equal(height);
+          expect(after.height).to.equal(width);          
+        });
+      });
+    })
+    it('should listen or orientationchange event when screen.orientation is missing', async function() {
+      await withFakeDOM(async () => {
+        navigator.mediaDevices.addDevice({
+          deviceId: '007',
+          groupId: '007',
+          kind: 'videoinput',
+          label: 'Spy camera',
+        });
+        const { orientation } = window.screen;
+        delete window.screen.orientation; 
+        await withTestRenderer(async ({ render }) => {
+          let state;
+          function Test() {
+            state = useMediaCapture({
+              video: true,
+            });
+            return null;                
+          }
+          const el = createElement(Test);
+          await render(el);
+          await delay(20);
+          const { status, liveVideo, lastError } = state;
+          expect(status).to.equal('previewing');
+          expect(liveVideo).to.be.an('object');
+          const { width, height } = liveVideo;
+          window.screen.orientation = orientation;
+          window.screen.orientation.rotate();
+          await delay(20);
           const { liveVideo: after } = state;
           expect(after).to.not.equal(liveVideo);
           expect(after.width).to.equal(height);
@@ -902,13 +937,13 @@ describe('Hooks', function() {
           }
           const el = createElement(Test);
           await render(el);
-          await delay(10);
+          await delay(20);
           const { status, liveVideo } = state;
           expect(status).to.equal('previewing');
           expect(liveVideo).to.be.an('object');
           const { width, height } = liveVideo;
           window.screen.orientation.rotate(180);
-          await delay(10);
+          await delay(20);
           const { liveVideo: after } = state;
           expect(after).to.equal(liveVideo);
         });
@@ -939,13 +974,13 @@ describe('Hooks', function() {
           }
           const el = createElement(Test);
           await render(el);
-          await delay(10);
+          await delay(20);
           const { liveVideo, status } = state;
           expect(liveVideo).to.not.be.undefined;
           expect(status).to.equal('previewing');
           const [ track ] = liveVideo.stream.getTracks();
           track.onended({ type: 'ended' });
-          await delay(10);
+          await delay(20);
           const { liveVideo: video, status: status2 } = state;
           expect(status2).to.equal('previewing');
           expect(video).to.not.equal(liveVideo);
@@ -971,18 +1006,18 @@ describe('Hooks', function() {
           }
           const el = createElement(Test);
           await render(el);
-          await delay(10);
+          await delay(20);
           const { liveVideo, status, record } = state;
           expect(liveVideo).to.not.be.undefined;
           expect(status).to.equal('previewing');
           record();
-          await delay(10);
+          await delay(20);
           const { duration, status: status2 } = state;
           expect(status2).to.equal('recording');
           expect(duration).to.equal(0);
           const [ track ] = liveVideo.stream.getTracks();
           track.onended({ type: 'ended' });
-          await delay(10);
+          await delay(20);
           const { status: status3 } = state;
           expect(status3).to.equal('previewing');
         });
@@ -1007,22 +1042,22 @@ describe('Hooks', function() {
           }
           const el = createElement(Test);
           await render(el);
-          await delay(10);
+          await delay(20);
           const { liveVideo, status, record, pause } = state;
           expect(liveVideo).to.not.be.undefined;
           expect(status).to.equal('previewing');
           record();
-          await delay(10);
+          await delay(20);
           const { duration, status: status2 } = state;
           expect(status2).to.equal('recording');
           expect(duration).to.equal(0);
           pause();
-          await delay(10);
+          await delay(20);
           const { status: status3 } = state;
           expect(status3).to.equal('paused');
           const [ track ] = liveVideo.stream.getTracks();
           track.onended({ type: 'ended' });
-          await delay(10);
+          await delay(20);
           const { status: status4 } = state;
           expect(status4).to.equal('previewing');
         });
@@ -1047,20 +1082,20 @@ describe('Hooks', function() {
           }
           const el = createElement(Test);
           await render(el);
-          await delay(10);
+          await delay(20);
           const { liveVideo, status, record } = state;
           expect(liveVideo).to.not.be.undefined;
           expect(status).to.equal('previewing');
           record();
-          await delay(10);
+          await delay(20);
           const { duration, status: status2 } = state;
           expect(status2).to.equal('recording');
           expect(duration).to.equal(0);
           liveVideo.stream.onData(new Blob([], {}));
-          await delay(10);
+          await delay(20);
           const [ track ] = liveVideo.stream.getTracks();
           track.onended({ type: 'ended' });
-          await delay(10);
+          await delay(20);
           const { status: status3, capturedVideo } = state;
           expect(status3).to.equal('recorded');
           expect(capturedVideo).to.be.an('object');
@@ -1086,24 +1121,24 @@ describe('Hooks', function() {
           }
           const el = createElement(Test);
           await render(el);
-          await delay(10);
+          await delay(20);
           const { liveVideo, status, record, pause } = state;
           expect(liveVideo).to.not.be.undefined;
           expect(status).to.equal('previewing');
           record();
-          await delay(10);
+          await delay(20);
           const { duration, status: status2 } = state;
           expect(status2).to.equal('recording');
           expect(duration).to.equal(0);
           liveVideo.stream.onData(new Blob([], {}));
-          await delay(10);
+          await delay(20);
           pause();
-          await delay(10);
+          await delay(20);
           const { status: status3 } = state;
           expect(status3).to.equal('paused');
           const [ track ] = liveVideo.stream.getTracks();
           track.onended({ type: 'ended' });
-          await delay(10);
+          await delay(20);
           const { status: status4, capturedVideo } = state;
           expect(status4).to.equal('recorded');
           expect(capturedVideo).to.be.an('object');
@@ -1129,25 +1164,25 @@ describe('Hooks', function() {
           }
           const el = createElement(Test);
           await render(el);
-          await delay(10);
+          await delay(20);
           const { liveVideo, status, record, stop } = state;
           expect(status).to.equal('previewing');
           record();
-          await delay(10);
+          await delay(20);
           const { duration, status: status2 } = state;
           expect(status2).to.equal('recording');
           expect(duration).to.equal(0);
           liveVideo.stream.onData(new Blob([], {}));
-          await delay(10);
+          await delay(20);
           stop();
-          await delay(10);
+          await delay(20);
           const { status: status3, capturedVideo, liveVideo: before } = state;
           expect(status3).to.equal('recorded');
           expect(capturedVideo).to.be.an('object');
           expect(before).to.be.an('object');
           const [ track ] = liveVideo.stream.getTracks();
           track.onended({ type: 'ended' });
-          await delay(10);
+          await delay(20);
           const { liveVideo: after } = state;
           expect(after).to.be.undefined;
         });
@@ -1172,13 +1207,13 @@ describe('Hooks', function() {
           }
           const el = createElement(Test);
           await render(el);
-          await delay(10);
+          await delay(20);
           const { status, lastError } = state;
           expect(status).to.equal('denied');
           expect(lastError).to.be.an('error');
           navigator.mediaDevices.allow = true;
           navigator.permissions.camera.dispatchEvent(new Event('change'));
-          await delay(10);
+          await delay(20);
           const { status: status2 } = state;
           expect(status2).to.equal('previewing');
         });
@@ -1204,14 +1239,14 @@ describe('Hooks', function() {
           }
           const el = createElement(Test);
           await render(el);
-          await delay(10);
+          await delay(20);
           const { liveAudio, status } = state;
           expect(liveAudio).to.not.be.undefined;
           expect(status).to.equal('previewing');
-          liveAudio.stream.onData({ volume: 51 });
-          await delay(10);
+          liveAudio.stream.onData({ volume: -51.2 });
+          await delay(60);
           const { volume } = state;
-          expect(volume).to.equal(51);
+          expect(volume).to.equal(-51);
           await unmount();
         });
       });

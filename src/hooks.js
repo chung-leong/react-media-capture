@@ -11,7 +11,7 @@ export function useMediaCapture(options = {}) {
   return useSequentialState(async function*({ initial, mount, manageEvents, signal }) {
     let status = 'acquiring';
     let duration;
-    let volume;
+    let volume = (watchVolume) ? -Infinity : undefined;
     let liveVideo;
     let liveAudio;
     let capturedVideo;
