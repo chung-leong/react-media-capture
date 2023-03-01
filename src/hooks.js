@@ -2,6 +2,7 @@ import { useSequentialState, throwing } from 'react-seq';
 
 export function useMediaCapture(options = {}) {
   const {
+    active = true,
     video = true,
     audio = true,
     preferredDevice = 'front',
@@ -9,7 +10,7 @@ export function useMediaCapture(options = {}) {
     watchVolume = false,
   } = options;
   return useSequentialState(async function*({ initial, mount, manageEvents, signal }) {
-    let status = 'acquiring';
+    let status = (active) ? 'acquiring' : 'pending';
     let duration;
     let volume = (watchVolume) ? -Infinity : undefined;
     let liveVideo;
@@ -75,15 +76,18 @@ export function useMediaCapture(options = {}) {
       };
     }
 
-    if (typeof(navigator) !== 'object' || !navigator.mediaDevices) {
-      status = 'denied';
+    if (status === 'acquiring') {
+      if (typeof(navigator) !== 'object' || !navigator.mediaDevices) {
+        status = 'denied';
+      }  
     }
 
     // set initial state
     initial(currentState());
 
     // don't bother doing anything at all when there's no media support
-    if (status === 'denied') {
+    // (or if it's not yet needed)
+    if (status === 'denied' || status === 'pending') {
       return;
     }
 
@@ -423,7 +427,7 @@ export function useMediaCapture(options = {}) {
       mediaRecorder?.stop();
       closeStream();
     }
-  }, [ video, audio, preferredDevice, selectNewDevice, watchVolume ]);
+  }, [ active, video, audio, preferredDevice, selectNewDevice, watchVolume ]);
 }
 
 async function enumerateDevices(kind) {
