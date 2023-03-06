@@ -113,7 +113,8 @@ export function useMediaCapture(options = {}) {
       let device = devices.find(d => d.id === selectedDeviceId);
       if (!device) {
         // see if the label contains the right keyword
-        device = devices.find(d => d.label.toLowerCase().includes(preferredDevice))
+        const keyword = preferredDevice.toLowerCase();
+        device = devices.find(d => d.label.toLowerCase().includes(keyword));
       }
       if (!device) {
         device = devices[0];
