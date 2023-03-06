@@ -117,7 +117,11 @@ export function useMediaCapture(options = {}) {
         device = devices.find(d => d.label.toLowerCase().includes(keyword));
       }
       if (!device) {
-        device = devices[0];
+        if (preferredDevice === 'front') {
+          device = devices[0];
+        } else {
+          device = devices[devices.length - 1];
+        }
       }
       // obtain a media stream with the correct constraints
       const constraints = { video, audio };
