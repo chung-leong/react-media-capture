@@ -24,12 +24,12 @@ export function useMediaCapture(options = {}) {
 
     const [ on, eventual ] = manageEvents({});
 
-    function snap(mimeType, quality) {
-      on.userRequest({ type: 'snap', mimeType, quality });
+    function snap(options) {
+      on.userRequest({ type: 'snap', options });
     }
 
-    function record(options, segment = undefined, callback = null) {
-      on.userRequest({ type: 'record', options, segment, callback });
+    function record(options) {
+      on.userRequest({ type: 'record', options });
     }
 
     function pause() {
@@ -166,14 +166,23 @@ export function useMediaCapture(options = {}) {
     let mediaDataCallback;
     let videoDimensions;
 
-    async function startRecorder(options, segment, callback) {
-      mediaRecorder = new MediaRecorder(stream, options);
+    async function startRecorder(options) {
+      const {
+        mimeType = (video) ? 'video/mp4' : 'audio/mpeg',
+        audioBitsPerSecond = 128000,
+        videoBitsPerSecond = 2500000,
+        timeslice,
+        callback,
+        keepLocalCopy = true, 
+        ...recorderOptions
+      } = options;
+      mediaRecorder = new MediaRecorder(stream, recorderOptions);
       mediaRecorder.addEventListener('dataavailable', onDataAvailable);
       mediaRecorder.addEventListener('start', startTimer);
       mediaRecorder.addEventListener('pause', stopTimer);
       mediaRecorder.addEventListener('resume', startTimer);
       mediaRecorder.addEventListener('stop', stopTimer);
-      mediaData = [];
+      mediaData = keepLocalCopy ? [] : null;
       mediaDataCallback = callback;
       duration = 0;
       if (liveVideo) {
@@ -182,7 +191,7 @@ export function useMediaCapture(options = {}) {
       }
       mediaRecorder.addEventListener('start', on.mediaStart, { once: true });
       mediaRecorder.addEventListener('error', on.mediaError.bind(throwing), { once: true });
-      mediaRecorder.start(segment);
+      mediaRecorder.start(timeslice);
       await eventual.mediaStart.or.mediaError;
     }
 
@@ -192,7 +201,7 @@ export function useMediaCapture(options = {}) {
       mediaRecorder.stop();
       await eventual.mediaStop.or.mediaError;
       let recorded = false;
-      if (mediaData.length > 0) {
+      if (mediaData?.length > 0) {
         let blob = mediaData[0];
         if (mediaData.length > 1) {
           blob = new Blob(mediaData, { type: blob.type });
@@ -212,7 +221,11 @@ export function useMediaCapture(options = {}) {
       return recorded;
     }
 
-    async function createSnapShot(mimeType, quality) {
+    async function createSnapShot(options) {
+      const { 
+        mimeType = 'image/jpeg', 
+        quality = 0.9, 
+      } = options;
       const el = await createVideoElement(liveVideo.stream)
       const blob = await saveVideoSnapShot(el, mimeType, quality);
       releaseVideoElement(el);
@@ -296,7 +309,9 @@ export function useMediaCapture(options = {}) {
 
     function onDataAvailable(evt) {
       const { data } = evt;
-      mediaData.push(data);
+      if (mediaData) {
+        mediaData.push(data);
+      }
       if (mediaDataCallback) {
         mediaDataCallback(data);
       }
@@ -343,10 +358,10 @@ export function useMediaCapture(options = {}) {
           } else if (status === 'previewing') {
             const res = await eventual.userRequest.or.streamChange.or.deviceChange.or.volumeChange;
             if (res.userRequest?.type === 'record') {
-              await startRecorder(res.userRequest.options, res.userRequest.segment, res.userRequest.callback);
+              await startRecorder(res.userRequest.options);
               status = 'recording';
             } else if (res.userRequest?.type === 'snap') {
-              await createSnapShot(res.userRequest.mimeType, res.userRequest.quality);
+              await createSnapShot(res.userRequest.options);
               status = 'recorded';
             } else if (res.userRequest?.type === 'select') {
               closeStream();
