@@ -119,7 +119,6 @@ describe('Hooks', function() {
         });
       });      
     })
-
     it('should reach the state of previewing when there is a device', async function() {
       await withFakeDOM(async () => {
         navigator.mediaDevices.addDevice({
