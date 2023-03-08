@@ -24,11 +24,11 @@ export function useMediaCapture(options = {}) {
 
     const [ on, eventual ] = manageEvents({});
 
-    function snap(options) {
+    function snap(options = {}) {
       on.userRequest({ type: 'snap', options });
     }
 
-    function record(options) {
+    function record(options = {}) {
       on.userRequest({ type: 'record', options });
     }
 

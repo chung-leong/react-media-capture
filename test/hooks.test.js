@@ -324,7 +324,7 @@ describe('Hooks', function() {
         });
       });
     })
-    it('should request device matching preferredDevice', async function() {
+    it('should select device matching preferredDevice', async function() {
       await withFakeDOM(async () => {
         navigator.mediaDevices.addDevice({
           deviceId: '00001-1',
@@ -363,7 +363,46 @@ describe('Hooks', function() {
         });
       });
     })
-    it('should request device matching preferredDevice', async function() {
+    it('should select last device when preferredDevice is back and nothing matches', async function() {
+      await withFakeDOM(async () => {
+        navigator.mediaDevices.addDevice({
+          deviceId: '00001-1',
+          groupId: '00001',
+          kind: 'videoinput',
+          label: 'Przedni aparat',
+        });
+        navigator.mediaDevices.addDevice({
+          deviceId: '00002-1',
+          groupId: '00002',
+          kind: 'videoinput',
+          label: 'Tylny aparat',
+        });
+        await withTestRenderer(async ({ render }) => {
+          let state;
+          function Test() {
+            state = useMediaCapture({
+              video: true,
+              audio: false,
+              preferredDevice: 'back',
+            });
+            return null;                
+          }
+          const el = createElement(Test);
+          await render(el);
+          await delay(10);
+          const { liveVideo, status, lastError, devices, selectedDeviceId } = state;
+          expect(liveVideo).to.not.be.undefined;
+          const { stream } = liveVideo;
+          const [ track ] = stream.getTracks();
+          expect(devices).to.have.lengthOf(2);
+          expect(track.device).to.have.property('deviceId', '00002-1');
+          expect(selectedDeviceId).to.equal('00002-1');
+          expect(status).to.equal('previewing');
+          expect(lastError).to.be.undefined;
+        });
+      });
+    })
+    it('should change device when selectDevice is called', async function() {
       await withFakeDOM(async () => {
         navigator.mediaDevices.addDevice({
           deviceId: '00001-1',
@@ -578,7 +617,11 @@ describe('Hooks', function() {
           expect(liveVideo).to.not.be.undefined;
           expect(status).to.equal('previewing');
           let calls = 0;
-          record({}, 1000, () => calls++);
+          record({
+            timeslice: 1000,
+            keepLocalCopy: false,
+            callback: () => calls++
+          });
           await delay(10);
           const { duration, status: status2 } = state;
           expect(status2).to.equal('recording');
@@ -589,8 +632,8 @@ describe('Hooks', function() {
           stop();
           await delay(10);
           const { status: status3, capturedVideo } = state;
-          expect(status3).to.equal('recorded');
-          expect(capturedVideo).to.be.an('object');
+          expect(status3).to.equal('previewing');
+          expect(capturedVideo).to.be.undefined;
           expect(calls).to.equal(2);
         });
       });
