@@ -825,6 +825,8 @@ describe('Hooks', function() {
           expect(status2).to.equal('recorded');
           expect(lastError).to.not.be.an('error');
           expect(capturedImage).to.be.an('object');
+          expect(capturedImage.width).to.be.at.least(100);
+          expect(capturedImage.height).to.be.at.least(100);
         });
       });
     })      

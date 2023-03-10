@@ -228,8 +228,8 @@ export function useMediaCapture(options = {}) {
       } = options;
       const el = await createVideoElement(liveVideo.stream)
       const blob = await saveVideoSnapShot(el, mimeType, quality);
-      releaseVideoElement(el);
       capturedImage = { blob, width: el.videoWidth, height: el.videoHeight };
+      releaseVideoElement(el);
     }
 
     let interval;

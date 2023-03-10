@@ -75,7 +75,7 @@ class HTMLVideoElement extends EventTarget {
   }
 
   get videoWidth() {
-    if (!this.loaded) {
+    if (!this.loaded || !this.srcObject) {
       return 0;
     } else {
       if ((screen.orientation?.angle|0) % 180 === 0) {
@@ -87,7 +87,7 @@ class HTMLVideoElement extends EventTarget {
   }
 
   get videoHeight() {
-    if (!this.loaded) {
+    if (!this.loaded || !this.srcObject) {
       return 0;
     } else {
       if ((screen.orientation?.angle|0) % 180 === 0) {
