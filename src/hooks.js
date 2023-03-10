@@ -167,6 +167,7 @@ export function useMediaCapture(options = {}) {
     let videoDimensions;
 
     async function startRecorder(options) {
+      // see https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder/MediaRecorder
       const {
         mimeType = (video) ? 'video/mp4' : 'audio/mpeg',
         audioBitsPerSecond = 128000,
@@ -174,9 +175,8 @@ export function useMediaCapture(options = {}) {
         timeslice,
         callback,
         keepLocalCopy = true, 
-        ...recorderOptions
       } = options;
-      mediaRecorder = new MediaRecorder(stream, recorderOptions);
+      mediaRecorder = new MediaRecorder(stream, { mimeType, audioBitsPerSecond, videoBitsPerSecond });
       mediaRecorder.addEventListener('dataavailable', onDataAvailable);
       mediaRecorder.addEventListener('start', startTimer);
       mediaRecorder.addEventListener('pause', stopTimer);

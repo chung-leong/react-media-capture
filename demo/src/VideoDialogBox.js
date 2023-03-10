@@ -21,7 +21,7 @@ export default function VideoDialogBox({ onClose, onCapture }) {
     selectDevice,
   } = useMediaCapture({ watchVolume: true });
   const classNames = [ 'video-viewport', status ];
-  const size = constrainSize(liveVideo, { width: 320, height: 240 });
+  const size = constrainSize(liveVideo, { width: 480, height: 360 });
 
   const onStart = useCallback(() => {
     const options = {
