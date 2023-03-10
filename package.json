@@ -1,6 +1,6 @@
 {
   "name": "react-media-capture",
-  "version": "0.0.7",
+  "version": "0.0.9",
   "description": "React hook for capturing video, audio, or images",
   "main": "index.js",
   "type": "module",

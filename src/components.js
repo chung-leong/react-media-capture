@@ -22,8 +22,10 @@ export function StreamVideo(props) {
   const { srcObject, ...remaining } = props;
   const ref = useRef();
   useEffect(() => {
-    const video = ref.current;
-    if (video.srcObject !== srcObject) {
+    // don't assume that we'll get a node since Test Renderer does not 
+    // give us one
+    const video = ref.current;    
+    if (video && video.srcObject !== srcObject) {
       video.srcObject = srcObject;
       if (srcObject) {
         video.play();
@@ -36,12 +38,12 @@ export function StreamVideo(props) {
 function useBlobURL(srcObject) {
   const ref = useRef();
   useEffect(() => {
-    const url = (srcObject) ? URL.createObjectURL(srcObject) : undefined;
     const node = ref.current;
     if (node) {
+      const url = (srcObject) ? URL.createObjectURL(srcObject) : undefined;
       node.src = url;
+      return (srcObject) ? () => URL.revokeObjectURL(url) : undefined;
     }
-    return (srcObject) ? () => URL.revokeObjectURL(url) : undefined;
   }, [ srcObject ]);
   return ref;
 }

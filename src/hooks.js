@@ -1,4 +1,4 @@
-import { useSequentialState, throwing } from 'react-seq';
+import { useSequentialState } from 'react-seq';
 
 export function useMediaCapture(options = {}) {
   const {
@@ -24,11 +24,11 @@ export function useMediaCapture(options = {}) {
 
     const [ on, eventual ] = manageEvents({});
 
-    function snap(options) {
+    function snap(options = {}) {
       on.userRequest({ type: 'snap', options });
     }
 
-    function record(options) {
+    function record(options = {}) {
       on.userRequest({ type: 'record', options });
     }
 
@@ -190,7 +190,7 @@ export function useMediaCapture(options = {}) {
         videoDimensions = { width: liveVideo.width, height: liveVideo.height };
       }
       mediaRecorder.addEventListener('start', on.mediaStart, { once: true });
-      mediaRecorder.addEventListener('error', on.mediaError.bind(throwing), { once: true });
+      mediaRecorder.addEventListener('error', on.mediaError.throw, { once: true });
       mediaRecorder.start(timeslice);
       await eventual.mediaStart.or.mediaError;
     }
