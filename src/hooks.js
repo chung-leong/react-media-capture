@@ -169,7 +169,7 @@ export function useMediaCapture(options = {}) {
     async function startRecorder(options) {
       // see https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder/MediaRecorder
       const {
-        mimeType = (video) ? 'video/mp4' : 'audio/mpeg',
+        mimeType = (video) ? 'video/webm' : 'audio/webm',
         audioBitsPerSecond = 128000,
         videoBitsPerSecond = 2500000,
         timeslice,
@@ -343,8 +343,12 @@ export function useMediaCapture(options = {}) {
     // watch for permission change
     if (navigator.permissions) {
       for (const name of [ 'camera', 'microphone' ]) {
-        const status = await navigator.permissions.query({ name });
-        status.addEventListener('change', on.permissionChange, { signal });
+        try {
+          const status = await navigator.permissions.query({ name });
+          status.addEventListener('change', on.permissionChange, { signal }); 
+          /* c8 ignore next 2 */
+        } catch (err) {          
+        }
       } 
     }
 
